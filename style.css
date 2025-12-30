@@ -214,23 +214,276 @@ h1 {
     min-width: 150px;
 }
 
-/* Responsive */
-@media (max-width: 600px) {
+/* Add Custom Option Button */
+.add-custom-btn {
+    margin-top: 10px;
+    padding: 10px 15px;
+    background: #fff;
+    border: 2px dashed #d4af37;
+    border-radius: 8px;
+    color: #8b0000;
+    font-size: 0.95em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.add-custom-btn:hover {
+    background: #fff5e6;
+    border-color: #8b0000;
+    transform: translateX(5px);
+}
+
+/* Custom Option Input */
+.custom-option-input {
+    margin-top: 10px;
+    padding: 12px;
+    background: #fff;
+    border: 2px solid #d4af37;
+    border-radius: 8px;
+}
+
+.custom-option-input input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1em;
+    font-family: inherit;
+    margin-bottom: 8px;
+}
+
+.custom-option-input input:focus {
+    outline: none;
+    border-color: #8b0000;
+}
+
+.custom-option-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.custom-option-buttons button {
+    flex: 1;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.custom-option-buttons .btn-add {
+    background: #8b0000;
+    color: white;
+}
+
+.custom-option-buttons .btn-add:hover {
+    background: #a00000;
+}
+
+.custom-option-buttons .btn-cancel {
+    background: #f0f0f0;
+    color: #666;
+}
+
+.custom-option-buttons .btn-cancel:hover {
+    background: #e0e0e0;
+}
+
+/* Responsive - Tablet */
+@media (max-width: 768px) {
+    body {
+        padding: 15px;
+    }
+
     .container {
-        padding: 20px;
+        padding: 25px;
+        border-radius: 15px;
     }
 
     h1 {
-        font-size: 1.8em;
+        font-size: 2em;
+    }
+
+    .subtitle {
+        font-size: 1em;
+    }
+
+    .menu-section {
+        padding: 20px;
+    }
+
+    .menu-section h2 {
+        font-size: 1.3em;
+    }
+
+    .option {
+        padding: 12px;
+    }
+
+    .option span {
+        font-size: 1em;
+    }
+
+    .btn {
+        padding: 12px 25px;
+        font-size: 1em;
+    }
+
+    .saved-menu {
+        padding: 20px;
+    }
+
+    #menuDisplay strong {
+        min-width: 120px;
+    }
+}
+
+/* Responsive - Mobile */
+@media (max-width: 600px) {
+    body {
+        padding: 10px;
+    }
+
+    .container {
+        padding: 15px;
+        border-radius: 10px;
+    }
+
+    header {
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+    }
+
+    h1 {
+        font-size: 1.6em;
+        line-height: 1.2;
+    }
+
+    .subtitle {
+        font-size: 0.9em;
+    }
+
+    .menu-sections {
+        gap: 20px;
+    }
+
+    .menu-section {
+        padding: 15px;
+        border-left-width: 4px;
+    }
+
+    .menu-section.highlight {
+        border-left-width: 6px;
+    }
+
+    .menu-section h2 {
+        font-size: 1.1em;
+        flex-wrap: wrap;
+        gap: 5px;
+    }
+
+    .option {
+        padding: 10px;
+        gap: 8px;
+    }
+
+    .option:hover {
+        transform: translateX(0);
+    }
+
+    .option span {
+        font-size: 0.95em;
+    }
+
+    .option small {
+        font-size: 0.8em;
+        margin-left: 28px;
+    }
+
+    .option input[type="radio"],
+    .option input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        flex-shrink: 0;
     }
 
     .actions {
         flex-direction: column;
+        gap: 10px;
     }
 
     .btn {
         width: 100%;
         justify-content: center;
+        padding: 14px 20px;
+        font-size: 1em;
+    }
+
+    .saved-menu {
+        padding: 15px;
+        margin-top: 25px;
+    }
+
+    .saved-menu h3 {
+        font-size: 1.2em;
+    }
+
+    #menuDisplay {
+        padding: 12px;
+    }
+
+    #menuDisplay p {
+        padding: 8px;
+        font-size: 0.9em;
+    }
+
+    #menuDisplay strong {
+        display: block;
+        min-width: auto;
+        margin-bottom: 3px;
+    }
+
+    .notification {
+        left: 10px;
+        right: 10px;
+        top: 10px;
+        padding: 12px 15px;
+        font-size: 0.9em;
+    }
+
+    .add-custom-btn {
+        font-size: 0.9em;
+        padding: 10px;
+    }
+
+    .custom-option-input {
+        padding: 10px;
+    }
+}
+
+/* Responsive - Very Small Mobile */
+@media (max-width: 400px) {
+    h1 {
+        font-size: 1.4em;
+    }
+
+    .menu-section h2 {
+        font-size: 1em;
+    }
+
+    .option span {
+        font-size: 0.9em;
+    }
+
+    .btn {
+        padding: 12px 15px;
+        font-size: 0.95em;
     }
 }
 

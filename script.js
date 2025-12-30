@@ -1,11 +1,23 @@
+// Supabase Configuration
+const SUPABASE_URL = 'https://qdodkjdyuggltvkwfwgy.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFkb2RramR5dWdnbHR2a3dmd2d5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcxMTU5NjYsImV4cCI6MjA4MjY5MTk2Nn0.IjjWLZnTVA-4m-vqSeVlIehP9sWP6AKTz__JEcMkJXM';
+
+// Initialize Supabase Client (use let to avoid redeclaration errors)
+let supabaseClient;
+if (typeof window.supabase !== 'undefined') {
+    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+} else {
+    console.error('Supabase library not loaded');
+}
+
 // DOM Elements
 const saveBtn = document.getElementById('saveBtn');
 const clearBtn = document.getElementById('clearBtn');
 const savedMenuDiv = document.getElementById('savedMenu');
 const menuDisplayDiv = document.getElementById('menuDisplay');
 
-// Storage key
-const STORAGE_KEY = 'yilbasi_menu_2025';
+// Menu ID - Always use ID 1 for single shared menu
+const MENU_ID = 1;
 
 // Load saved menu on page load
 window.addEventListener('DOMContentLoaded', () => {
@@ -13,7 +25,7 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 // Save menu
-saveBtn.addEventListener('click', () => {
+saveBtn.addEventListener('click', async () => {
     const menuData = collectMenuData();
 
     if (!validateMenu(menuData)) {
@@ -21,35 +33,92 @@ saveBtn.addEventListener('click', () => {
         return;
     }
 
-    // Save to localStorage
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(menuData));
+    // Show loading state
+    saveBtn.disabled = true;
+    saveBtn.textContent = '💾 Kaydediliyor...';
 
-    // Display saved menu
-    displaySavedMenu(menuData);
+    try {
+        // Prepare data for Supabase
+        const supabaseData = {
+            id: MENU_ID,
+            aperatif: menuData.aperatif,
+            corba: menuData.corba,
+            ana_yemek: menuData.anaYemek,
+            yan_yemekler: menuData.yanYemekler,
+            salata: menuData.salata,
+            tatli: menuData.tatli,
+            icecekler: menuData.icecekler
+        };
 
-    showNotification('Menü başarıyla kaydedildi!', 'success');
+        // Upsert (Insert or Update) to Supabase
+        const { data, error } = await supabaseClient
+            .from('menu_selections')
+            .upsert(supabaseData, { onConflict: 'id' })
+            .select();
+
+        if (error) {
+            throw error;
+        }
+
+        // Display saved menu
+        displaySavedMenu(menuData);
+
+        showNotification('Menü başarıyla kaydedildi! Herkes bu menüyü görecek 🎉', 'success');
+    } catch (error) {
+        console.error('Supabase error:', error);
+        showNotification('Kaydetme hatası: ' + error.message, 'error');
+    } finally {
+        // Reset button state
+        saveBtn.disabled = false;
+        saveBtn.textContent = '💾 Menüyü Kaydet';
+    }
 });
 
 // Clear selections
-clearBtn.addEventListener('click', () => {
-    if (confirm('Tüm seçimleri temizlemek istediğinize emin misiniz?')) {
-        // Clear all inputs
-        document.querySelectorAll('input[type="radio"]').forEach(input => {
-            if (input.name !== 'ana-yemek') {
-                input.checked = false;
+clearBtn.addEventListener('click', async () => {
+    if (confirm('Tüm seçimleri temizlemek istediğinize emin misiniz? Bu herkes için geçerli olacak!')) {
+        // Show loading state
+        clearBtn.disabled = true;
+        clearBtn.textContent = '🗑️ Temizleniyor...';
+
+        try {
+            // Delete from Supabase
+            const { error } = await supabaseClient
+                .from('menu_selections')
+                .delete()
+                .eq('id', MENU_ID);
+
+            if (error) {
+                throw error;
             }
-        });
-        document.querySelectorAll('input[type="checkbox"]').forEach(input => {
-            input.checked = false;
-        });
 
-        // Clear localStorage
-        localStorage.removeItem(STORAGE_KEY);
+            // Clear all inputs
+            document.querySelectorAll('input[type="radio"]').forEach(input => {
+                if (input.name !== 'ana-yemek') {
+                    input.checked = false;
+                }
+            });
+            document.querySelectorAll('input[type="checkbox"]').forEach(input => {
+                input.checked = false;
+            });
 
-        // Hide saved menu display
-        savedMenuDiv.style.display = 'none';
+            // Remove selected class from all options
+            document.querySelectorAll('.option').forEach(option => {
+                option.classList.remove('selected');
+            });
 
-        showNotification('Seçimler temizlendi!', 'info');
+            // Hide saved menu display
+            savedMenuDiv.style.display = 'none';
+
+            showNotification('Seçimler temizlendi! Herkes için sıfırlandı.', 'info');
+        } catch (error) {
+            console.error('Supabase error:', error);
+            showNotification('Temizleme hatası: ' + error.message, 'error');
+        } finally {
+            // Reset button state
+            clearBtn.disabled = false;
+            clearBtn.textContent = '🗑️ Seçimleri Temizle';
+        }
     }
 });
 
@@ -131,48 +200,73 @@ function displaySavedMenu(data) {
     savedMenuDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
-// Load saved menu from localStorage
-function loadSavedMenu() {
-    const savedData = localStorage.getItem(STORAGE_KEY);
+// Load saved menu from Supabase
+async function loadSavedMenu() {
+    try {
+        // Fetch from Supabase
+        const { data, error } = await supabaseClient
+            .from('menu_selections')
+            .select('*')
+            .eq('id', MENU_ID)
+            .single();
 
-    if (savedData) {
-        try {
-            const data = JSON.parse(savedData);
+        if (error) {
+            // If no menu exists yet, that's okay
+            if (error.code === 'PGRST116') {
+                console.log('No menu saved yet');
+                return;
+            }
+            throw error;
+        }
+
+        if (data) {
+            // Convert Supabase data to menu format
+            const menuData = {
+                aperatif: data.aperatif,
+                corba: data.corba,
+                anaYemek: data.ana_yemek,
+                yanYemekler: data.yan_yemekler || [],
+                salata: data.salata,
+                tatli: data.tatli,
+                icecekler: data.icecekler || [],
+                tarih: new Date(data.created_at).toLocaleDateString('tr-TR')
+            };
 
             // Restore selections
-            if (data.aperatif) {
-                setRadioValue('aperatif', data.aperatif);
+            if (menuData.aperatif) {
+                setRadioValue('aperatif', menuData.aperatif);
             }
 
-            if (data.corba) {
-                setRadioValue('corba', data.corba);
+            if (menuData.corba) {
+                setRadioValue('corba', menuData.corba);
             }
 
-            if (data.salata) {
-                setRadioValue('salata', data.salata);
+            if (menuData.salata) {
+                setRadioValue('salata', menuData.salata);
             }
 
-            if (data.tatli) {
-                setRadioValue('tatli', data.tatli);
+            if (menuData.tatli) {
+                setRadioValue('tatli', menuData.tatli);
             }
 
-            if (data.yanYemekler) {
-                data.yanYemekler.forEach(value => {
+            if (menuData.yanYemekler && menuData.yanYemekler.length > 0) {
+                menuData.yanYemekler.forEach(value => {
                     setCheckboxValue('yan', value);
                 });
             }
 
-            if (data.icecekler) {
-                data.icecekler.forEach(value => {
+            if (menuData.icecekler && menuData.icecekler.length > 0) {
+                menuData.icecekler.forEach(value => {
                     setCheckboxValue('icecek', value);
                 });
             }
 
             // Display saved menu
-            displaySavedMenu(data);
-        } catch (e) {
-            console.error('Error loading saved menu:', e);
+            displaySavedMenu(menuData);
         }
+    } catch (error) {
+        console.error('Error loading saved menu:', error);
+        showNotification('Menü yüklenirken hata oluştu: ' + error.message, 'error');
     }
 }
 
@@ -215,26 +309,120 @@ function showNotification(message, type = 'success') {
 }
 
 // Add visual feedback for selected options
-document.querySelectorAll('.option').forEach(option => {
-    const input = option.querySelector('input');
+function updateOptionVisualFeedback() {
+    document.querySelectorAll('.option').forEach(option => {
+        const input = option.querySelector('input');
 
-    input.addEventListener('change', () => {
-        if (input.type === 'radio') {
-            // Remove selected class from all options in the same group
-            document.querySelectorAll(`input[name="${input.name}"]`).forEach(radio => {
-                radio.closest('.option').classList.remove('selected');
-            });
-        }
+        // Remove old listeners by cloning
+        const newOption = option.cloneNode(true);
+        option.parentNode.replaceChild(newOption, option);
 
-        if (input.checked) {
-            option.classList.add('selected');
-        } else {
-            option.classList.remove('selected');
+        const newInput = newOption.querySelector('input');
+
+        newInput.addEventListener('change', () => {
+            if (newInput.type === 'radio') {
+                // Remove selected class from all options in the same group
+                document.querySelectorAll(`input[name="${newInput.name}"]`).forEach(radio => {
+                    radio.closest('.option').classList.remove('selected');
+                });
+            }
+
+            if (newInput.checked) {
+                newOption.classList.add('selected');
+            } else {
+                newOption.classList.remove('selected');
+            }
+        });
+
+        // Set initial state
+        if (newInput.checked) {
+            newOption.classList.add('selected');
         }
     });
+}
 
-    // Set initial state
-    if (input.checked) {
-        option.classList.add('selected');
-    }
+// Initialize visual feedback
+updateOptionVisualFeedback();
+
+// Add Custom Option Functionality
+document.querySelectorAll('.add-custom-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const category = this.dataset.category;
+        const type = this.dataset.type;
+        const section = this.closest('.menu-section');
+        const optionsDiv = section.querySelector('.options');
+
+        // Check if input form already exists
+        if (section.querySelector('.custom-option-input')) {
+            return;
+        }
+
+        // Create input form
+        const inputForm = document.createElement('div');
+        inputForm.className = 'custom-option-input';
+        inputForm.innerHTML = `
+            <input type="text" placeholder="Yeni seçeneğin adını gir..." maxlength="100">
+            <div class="custom-option-buttons">
+                <button class="btn-add">Ekle</button>
+                <button class="btn-cancel">İptal</button>
+            </div>
+        `;
+
+        // Insert form before the add button
+        this.parentNode.insertBefore(inputForm, this);
+
+        const input = inputForm.querySelector('input');
+        const addBtn = inputForm.querySelector('.btn-add');
+        const cancelBtn = inputForm.querySelector('.btn-cancel');
+
+        // Focus input
+        input.focus();
+
+        // Add button click
+        addBtn.addEventListener('click', () => {
+            const value = input.value.trim();
+            if (!value) {
+                showNotification('Lütfen bir isim girin!', 'error');
+                return;
+            }
+
+            // Create new option
+            const newOption = document.createElement('label');
+            newOption.className = 'option';
+            newOption.innerHTML = `
+                <input type="${type}" name="${category}" value="${value}">
+                <span>${value}</span>
+            `;
+
+            // Add to options
+            optionsDiv.appendChild(newOption);
+
+            // Remove input form
+            inputForm.remove();
+
+            // Update visual feedback
+            updateOptionVisualFeedback();
+
+            showNotification('Seçenek eklendi!', 'success');
+        });
+
+        // Cancel button click
+        cancelBtn.addEventListener('click', () => {
+            inputForm.remove();
+        });
+
+        // Enter key to add
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                addBtn.click();
+            }
+        });
+
+        // Escape key to cancel
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                cancelBtn.click();
+            }
+        });
+    });
 });
