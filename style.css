@@ -1,0 +1,260 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    color: #333;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+header {
+    text-align: center;
+    margin-bottom: 40px;
+    padding-bottom: 20px;
+    border-bottom: 3px solid #d4af37;
+}
+
+h1 {
+    color: #8b0000;
+    font-size: 2.5em;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.subtitle {
+    color: #666;
+    font-size: 1.1em;
+    font-style: italic;
+}
+
+.menu-sections {
+    display: grid;
+    gap: 30px;
+    margin-bottom: 30px;
+}
+
+.menu-section {
+    background: #f9f9f9;
+    padding: 25px;
+    border-radius: 15px;
+    border-left: 5px solid #d4af37;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.menu-section:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.menu-section.highlight {
+    background: linear-gradient(135deg, #fff5e6 0%, #ffe6cc 100%);
+    border-left-color: #8b0000;
+    border-left-width: 8px;
+}
+
+.menu-section h2 {
+    color: #8b0000;
+    margin-bottom: 15px;
+    font-size: 1.5em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.options {
+    display: grid;
+    gap: 12px;
+}
+
+.option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 15px;
+    background: white;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.option:hover {
+    background: #fff5e6;
+    border-color: #d4af37;
+    transform: translateX(5px);
+}
+
+.option.selected {
+    background: #fff5e6;
+    border-color: #8b0000;
+}
+
+.option input[type="radio"],
+.option input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    accent-color: #8b0000;
+}
+
+.option span {
+    font-size: 1.05em;
+    color: #333;
+    font-weight: 500;
+    flex: 1;
+}
+
+.option small {
+    display: block;
+    color: #666;
+    font-size: 0.85em;
+    margin-top: 5px;
+    margin-left: 32px;
+}
+
+.actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 30px;
+}
+
+.btn {
+    padding: 15px 30px;
+    font-size: 1.1em;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #8b0000 0%, #a00000 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(139, 0, 0, 0.3);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(139, 0, 0, 0.4);
+}
+
+.btn-secondary {
+    background: #f0f0f0;
+    color: #666;
+}
+
+.btn-secondary:hover {
+    background: #e0e0e0;
+    transform: translateY(-2px);
+}
+
+.saved-menu {
+    margin-top: 40px;
+    padding: 30px;
+    background: linear-gradient(135deg, #e6f7ff 0%, #d9f2e6 100%);
+    border-radius: 15px;
+    border: 3px solid #d4af37;
+    animation: slideIn 0.5s ease;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.saved-menu h3 {
+    color: #8b0000;
+    margin-bottom: 20px;
+    font-size: 1.5em;
+}
+
+#menuDisplay {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    line-height: 1.8;
+}
+
+#menuDisplay p {
+    margin-bottom: 10px;
+    padding: 10px;
+    background: #f9f9f9;
+    border-radius: 5px;
+    border-left: 3px solid #d4af37;
+}
+
+#menuDisplay strong {
+    color: #8b0000;
+    display: inline-block;
+    min-width: 150px;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .container {
+        padding: 20px;
+    }
+
+    h1 {
+        font-size: 1.8em;
+    }
+
+    .actions {
+        flex-direction: column;
+    }
+
+    .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* Notification */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #4caf50;
+    color: white;
+    padding: 15px 25px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    animation: slideInRight 0.5s ease;
+    z-index: 1000;
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(100px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
